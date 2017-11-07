@@ -11,7 +11,7 @@ from datetime import datetime
 import configparser
 
 
-### Konfiguration ###
+# Konfiguration ###
 
 configfile = './config.file'
 
