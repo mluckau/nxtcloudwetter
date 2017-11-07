@@ -24,23 +24,14 @@ else:
     print("[FEHLER] Configfile nicht vorhanden.")
     sys.exit(1)
 
-# username = 'mluckau'  # Benutzername
 username = config['USER']['username']
-# token = 'gdBQD-dYkcZ-7QSxx-kKYQE-azoiC'  # Api-Token
 token = config['USER']['token']
-# json_file = "/var/www/html/json/current/current.json"  # JSON-file das die Sensordaten enthält
 json_file = config['DATA']['input']
-# deviceId = '6e653e48-0f9f-11e7-93ae-92361f002671'  # Die Device ID
 deviceId = config['DEVICE']['deviceId']
-# url = 'https://cloud.interitus.de/index.php/apps/sensorlogger/api/v1/createlog/'  # Posting URL für Sensorlogger
 url = config['DATA']['url']
-# logdatei = "/home/pi/sendjsondaten/senddata.log"  # Vollständiger Pfad und Dateiname zur Logdatei
 logdatei = config['LOG']['file']
-# rmjson = False  # soll das json-file nach jedem erfolgreichen übertragen gelöscht werden?
 rmjson = config['DATA']['removejson']
-# dataTypeIdTemp = 4  # Data Type ID für Temperatur
 dataTypeIdTemp = config['DEVICE']['tempID']
-# dataTypeIdHumidity = 5  # Data Type ID für Luftfeuchtigkeit
 dataTypeIdHumidity = config['DEVICE']['humidityID']
 
 
@@ -71,13 +62,6 @@ def wetterdaten():
     currentDate = cdatetime.strftime('%Y-%m-%d %H:%M:%S')
 
     if temp is not None and humidity is not None:
-
-        # payload = {
-        #	'deviceId': deviceId,
-        #	'temperature': temp,
-        #	'humidity': humidity,
-        #	'date': currentDate
-        # }
 
         payload = {
             'date': currentDate,
