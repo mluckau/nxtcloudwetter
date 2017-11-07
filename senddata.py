@@ -11,14 +11,12 @@ from datetime import datetime
 import configparser
 
 
-# Konfiguration ###
+### Konfiguration ###
 
 configfile = './config.file'
 
-
-config = configparser.ConfigParser()
-
 if os.path.isfile(configfile):
+    config = configparser.ConfigParser()
     config.read(configfile)
 else:
     print("[FEHLER] Configfile nicht vorhanden.")
