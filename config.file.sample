@@ -1,0 +1,16 @@
+[USER]
+username =
+token =
+
+[LOG]
+file =
+
+[DEVICE]
+deviceId =
+tempID = 4
+HumidityID = 5
+
+[DATA]
+input = /var/www/html/json/current/current.json
+url =
+removejson = False
