@@ -9,17 +9,29 @@ import urllib.request, urllib.error, urllib.parse
 import base64
 from datetime import datetime
 import configparser
+import argparse
+
+parser = argparse.ArgumentParser(description="Sendet Weewx-Wetterdaten an einen Nextcloud-Server mit installierter Sensorlogger App.")
+parser.add_argument("-d", "--debug", help="Debugmodus einschalten", action="store_true")
+parser.add_argument("-c", "--config", help="Konfigurationsdatei [default = config.file]")
+parser.add_argument("-t", "--trigger", help="Incrontrigger übergabe zur Benutzung in der incrontab [z.B. senddata.py -t $%%] wird in Logdatei geschrieben zum debuggen.")
+
+args = parser.parse_args()
 
 
 ### Konfiguration ###
 
-configfile = './config.file'
+if args.config:
+    configfile = args.config
+else:
+    configfile = './config.file'
+
 
 if os.path.isfile(configfile):
     config = configparser.ConfigParser()
     config.read(configfile)
 else:
-    print("[FEHLER] Configfile nicht vorhanden.")
+    print("[FEHLER] Configfile [%s] nicht vorhanden." % configfile)
     sys.exit(1)
 
 username = config['USER']['username']
@@ -40,9 +52,12 @@ def log(msg):
         file = open(logdatei, "a")
         file.write("%s: %s\n" % (time.strftime("%d.%m.%Y %H:%M:%S"), msg))
         file.close
+        if args.debug:
+            print(msg)
     except IOError as e:
         print(("[Warnung] Logdatei [%s] konnte nicht geschrieben werden. [%s]" % (logdatei, e.strerror)))
         print(("%s" % msg))
+
 
 def removeJson():
     try:
@@ -109,8 +124,10 @@ def wetterdaten():
         sys.exit(1)
 
 
-if sys.argv[1:]:  # Überprüfen ob Kommandozeilenparameter übergeben wurden
-    parameter = sys.argv[1]
+# if sys.argv[1:]:  # Überprüfen ob Kommandozeilenparameter übergeben wurden
+if args.trigger:
+    # parameter = sys.argv[1]
+    parameter = args.trigger
     bparameter = True
 else:
     bparameter = False
