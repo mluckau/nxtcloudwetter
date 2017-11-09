@@ -14,6 +14,9 @@ import createconf
 
 
 parser = argparse.ArgumentParser(description="Sendet Weewx-Wetterdaten an einen Nextcloud-Server mit installierter Sensorlogger App.")
+group = parser.add_mutually_exclusive_group()
+group.add_argument("-s", "--send", help="Daten senden [default]", action="store_true")
+group.add_argument("-r", "--register", help="Device registrieren", action="store_true")
 parser.add_argument("-d", "--debug", help="Debugmodus einschalten", action="store_true")
 parser.add_argument("-c", "--config", help="Konfigurationsdatei [default = config.file]")
 parser.add_argument("-e", "--econf", help="Erzeuge leere Konfigurationsdatei", action="store_true")
@@ -56,6 +59,13 @@ dataTypeIdTemp = config['DEVICE']['tempID']
 dataTypeIdHumidity = config['DEVICE']['humidityID']
 
 
+if args.trigger:
+    parameter = args.trigger
+    bparameter = True
+else:
+    bparameter = False
+
+
 def log(msg):
     try:
         file = open(logdatei, "a")
@@ -66,6 +76,25 @@ def log(msg):
     except IOError as e:
         print(("[Warnung] Logdatei [%s] konnte nicht geschrieben werden. [%s]" % (logdatei, e.strerror)))
         print(("%s" % msg))
+
+
+def sendjson(payload):
+    req = urllib.request.Request(url)
+    base64string = base64.encodestring('%s:%s' % (username, token)).replace('\n', '')
+    req.add_header("Authorization", "Basic %s" % base64string)
+    req.add_header("Content-Security-Policy",
+                   "default-src 'none';script-src 'self' 'unsafe-eval';style-src 'self' 'unsafe-inline';img-src 'self' data: blob:;font-src 'self';connect-src 'self';media-src 'self'")
+    req.add_header('Content-Type', 'application/json')
+    data = json.dumps(payload)
+
+    try:
+        response = urllib.request.urlopen(req, data)
+        result = response.getcode()
+        return result
+
+    except urllib.error.HTTPError as e:
+        log("[Fehler] Daten konnten nicht an Server gesendet werden. [Fehlercode: %s]" % e.code)
+        sys.exit(1)
 
 
 def removeJson():
@@ -100,28 +129,14 @@ def wetterdaten():
             ]
         }
 
-        req = urllib.request.Request(url)
-        base64string = base64.encodestring('%s:%s' % (username, token)).replace('\n', '')
-        req.add_header("Authorization", "Basic %s" % base64string)
-        req.add_header("Content-Security-Policy",
-                       "default-src 'none';script-src 'self' 'unsafe-eval';style-src 'self' 'unsafe-inline';img-src 'self' data: blob:;font-src 'self';connect-src 'self';media-src 'self'")
-        req.add_header('Content-Type', 'application/json')
-        data = json.dumps(payload)
+        result = sendjson(payload)
 
-        try:
-            response = urllib.request.urlopen(req, data)
-            result = response.getcode()
-
-            if bparameter:
-                log("[OK] Wetterdaten erfolgreich an Server gesendet.[t: %s][h: %s][Responsecode: %s][Trigger: %s]" % (
+        if bparameter:
+            log("[OK] Wetterdaten erfolgreich an Server gesendet.[t: %s][h: %s][Responsecode: %s][Trigger: %s]" % (
                 temp, humidity, result, parameter))
-            else:
-                log("[OK] Wetterdaten erfolgreich an Server gesendet.[t: %s][h: %s][Responsecode: %s]" % (
+        else:
+            log("[OK] Wetterdaten erfolgreich an Server gesendet.[t: %s][h: %s][Responsecode: %s]" % (
                 temp, humidity, result))
-
-        except urllib.error.HTTPError as e:
-            log("[Fehler] Daten konnten nicht an Server gesendet werden. [Fehlercode: %s]" % e.code)
-            sys.exit(1)
 
         if rmjson:
             removeJson()
@@ -133,19 +148,21 @@ def wetterdaten():
         sys.exit(1)
 
 
-if args.trigger:
-    parameter = args.trigger
-    bparameter = True
-else:
-    bparameter = False
+def regdevice():
+    print("Device registrieren")
+    # todo Code für Device Registrierung hinzufügen
 
-if os.path.isfile(json_file):
-    json_data = open(json_file)
-    data = json.load(json_data)
-    json_data.close()
-    temp = ('%.1f' % float((data['stats']['current']['outTemp'].replace(',', '.'))))
-    humidity = ('%.1f' % float((data['stats']['current']['humidity'].replace(',', '.'))))
-    wetterdaten()
+
+if args.register:
+    regdevice()
 else:
-    log("[Fehler] %s nicht vorhanden." % json_file)
-    sys.exit(1)
+    if os.path.isfile(json_file):
+        json_data = open(json_file)
+        data = json.load(json_data)
+        json_data.close()
+        temp = ('%.1f' % float((data['stats']['current']['outTemp'].replace(',', '.'))))
+        humidity = ('%.1f' % float((data['stats']['current']['humidity'].replace(',', '.'))))
+        wetterdaten()
+    else:
+        log("[Fehler] %s nicht vorhanden." % json_file)
+        sys.exit(1)
