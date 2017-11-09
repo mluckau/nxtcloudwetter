@@ -18,6 +18,7 @@ parser.add_argument("-d", "--debug", help="Debugmodus einschalten", action="stor
 parser.add_argument("-c", "--config", help="Konfigurationsdatei [default = config.file]")
 parser.add_argument("-e", "--econf", help="Erzeuge leere Konfigurationsdatei", action="store_true")
 parser.add_argument("-t", "--trigger", help="Incrontrigger übergabe zur Benutzung in der incrontab [z.B. senddata.py -t $%%] wird in Logdatei geschrieben zum debuggen.")
+parser.add_argument("-l", "--logfile", help="Schreibt Ausgaben in [logfile], überschreibt die Angabe in der Konfigurationsdatei.")
 
 args = parser.parse_args()
 
@@ -44,10 +45,16 @@ token = config['USER']['token']
 json_file = config['DATA']['input']
 deviceId = config['DEVICE']['deviceId']
 url = config['DATA']['url']
-logdatei = config['LOG']['file']
+
+if args.logfile:
+    logdatei = args.logfile
+else:
+    logdatei = config['LOG']['file']
+
 rmjson = config['DATA']['removejson']
 dataTypeIdTemp = config['DEVICE']['tempID']
 dataTypeIdHumidity = config['DEVICE']['humidityID']
+
 
 def log(msg):
     try:
