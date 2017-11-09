@@ -10,21 +10,26 @@ import base64
 from datetime import datetime
 import configparser
 import argparse
+import createconf
+
 
 parser = argparse.ArgumentParser(description="Sendet Weewx-Wetterdaten an einen Nextcloud-Server mit installierter Sensorlogger App.")
 parser.add_argument("-d", "--debug", help="Debugmodus einschalten", action="store_true")
 parser.add_argument("-c", "--config", help="Konfigurationsdatei [default = config.file]")
+parser.add_argument("-e", "--econf", help="Erzeuge leere Konfigurationsdatei", action="store_true")
 parser.add_argument("-t", "--trigger", help="Incrontrigger übergabe zur Benutzung in der incrontab [z.B. senddata.py -t $%%] wird in Logdatei geschrieben zum debuggen.")
 
 args = parser.parse_args()
 
 
-### Konfiguration ###
-
 if args.config:
     configfile = args.config
 else:
     configfile = './config.file'
+
+
+if args.econf:
+    createconf.createconf(configfile)
 
 
 if os.path.isfile(configfile):
@@ -43,9 +48,6 @@ logdatei = config['LOG']['file']
 rmjson = config['DATA']['removejson']
 dataTypeIdTemp = config['DEVICE']['tempID']
 dataTypeIdHumidity = config['DEVICE']['humidityID']
-
-
-### Ab hier sind keine Änderungen mehr notwendig ###
 
 def log(msg):
     try:
@@ -124,9 +126,7 @@ def wetterdaten():
         sys.exit(1)
 
 
-# if sys.argv[1:]:  # Überprüfen ob Kommandozeilenparameter übergeben wurden
 if args.trigger:
-    # parameter = sys.argv[1]
     parameter = args.trigger
     bparameter = True
 else:
