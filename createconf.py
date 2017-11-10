@@ -3,24 +3,17 @@ import os
 import sys
 
 
-conflines = [
-    '[USER]',
-    'username = ',
-    'token = ',
-    '',
-    '[LOG]',
-    'file = senddata.log',
-    '',
-    '[DEVICE]',
-    'deviceId = ',
-    'tempID = ',
-    'HumidityID = ',
-    '',
-    '[DATA]',
-    'input = /var/www/html/json/current/current.json',
-    'url = https://deine.nextcloud.url/index.php/apps/sensorlogger/api/v1/createlog/',
-    'removejson = False'
-]
+def userinput():
+    newconf = []
+    newconf.append(input("Benutzername: "))  # 0
+    newconf.append(input("Benutzertoken: "))  # 1
+    newconf.append(input("Logfile: "))  # 2
+    newconf.append(input("Device-ID: "))  # 3
+    newconf.append(input("JSON Inputdatei: "))  # 4
+    newconf.append(input("Sensorlogger URL: "))  # 5
+    newconf.append(input("Temperatursensor ID: "))  # 6
+    newconf.append(input("Luftfeuchtigkeitssensor ID: "))  # 7
+    return newconf
 
 
 def createconf(configfile):
@@ -28,6 +21,25 @@ def createconf(configfile):
         print("[Fehler] Konfigurationsdatei [%s] bereits vorhanden." % configfile)
         sys.exit(1)
     else:
+        data = userinput()
+        conflines = [
+                '[USER]',
+                'username = ' + str(data[0]),
+                'token = ' + str(data[1]),
+                '',
+                '[LOG]',
+                'file = ' + str(data[2]),
+                '',
+                '[DEVICE]',
+                'deviceId = ' + str(data[3]),
+                'tempID = ' + str(data[6]),
+                'HumidityID = ' + str(data[7]),
+                '',
+                '[DATA]',
+                'input = ' + str(data[4]),
+                'logurl = ' + str(data[5]),
+                'removejson = False'
+            ]
         try:
             with open(configfile, 'w') as config:
                 config.write('\n'.join(conflines))

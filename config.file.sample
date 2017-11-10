@@ -12,5 +12,5 @@ HumidityID = 5
 
 [DATA]
 input = /var/www/html/json/current/current.json
-url =
+logurl =
 removejson = False

@@ -19,7 +19,7 @@ group.add_argument("-s", "--send", help="Daten senden [default]", action="store_
 group.add_argument("-r", "--register", help="Device registrieren", action="store_true")
 parser.add_argument("-d", "--debug", help="Debugmodus einschalten", action="store_true")
 parser.add_argument("-c", "--config", help="Konfigurationsdatei [default = config.file]")
-parser.add_argument("-e", "--econf", help="Erzeuge leere Konfigurationsdatei", action="store_true")
+parser.add_argument("-e", "--econf", help="Konfigurationsdatei erzeugen", action="store_true")
 parser.add_argument("-t", "--trigger", help="Incrontrigger übergabe zur Benutzung in der incrontab [z.B. senddata.py -t $%%] wird in Logdatei geschrieben zum debuggen.")
 parser.add_argument("-l", "--logfile", help="Schreibt Ausgaben in [logfile], überschreibt die Angabe in der Konfigurationsdatei.")
 
@@ -39,24 +39,23 @@ if args.econf:
 if os.path.isfile(configfile):
     config = configparser.ConfigParser()
     config.read(configfile)
+    username = config['USER']['username']
+    token = config['USER']['token']
+    json_file = config['DATA']['input']
+    deviceId = config['DEVICE']['deviceId']
+    logurl = config['DATA']['logurl']
+
+    if args.logfile:
+        logdatei = args.logfile
+    else:
+        logdatei = config['LOG']['file']
+
+    rmjson = config['DATA']['removejson']
+    dataTypeIdTemp = config['DEVICE']['tempID']
+    dataTypeIdHumidity = config['DEVICE']['humidityID']
 else:
     print("[FEHLER] Configfile [%s] nicht vorhanden." % configfile)
     sys.exit(1)
-
-username = config['USER']['username']
-token = config['USER']['token']
-json_file = config['DATA']['input']
-deviceId = config['DEVICE']['deviceId']
-url = config['DATA']['url']
-
-if args.logfile:
-    logdatei = args.logfile
-else:
-    logdatei = config['LOG']['file']
-
-rmjson = config['DATA']['removejson']
-dataTypeIdTemp = config['DEVICE']['tempID']
-dataTypeIdHumidity = config['DEVICE']['humidityID']
 
 
 if args.trigger:
@@ -79,8 +78,8 @@ def log(msg):
 
 
 def sendjson(payload):
-    req = urllib.request.Request(url)
-    base64string = base64.encodestring('%s:%s' % (username, token)).replace('\n', '')
+    req = urllib.request.Request(logurl)
+    base64string = base64.encodebytes('%s:%s' % (username, token)).replace('\n', '')
     req.add_header("Authorization", "Basic %s" % base64string)
     req.add_header("Content-Security-Policy",
                    "default-src 'none';script-src 'self' 'unsafe-eval';style-src 'self' 'unsafe-inline';img-src 'self' data: blob:;font-src 'self';connect-src 'self';media-src 'self'")
