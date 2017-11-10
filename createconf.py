@@ -18,7 +18,7 @@ def userinput():
 
 def createconf(configfile):
     if os.path.isfile(configfile):
-        print("[Fehler] Konfigurationsdatei [%s] bereits vorhanden." % configfile)
+        print("[Fehler] Konfigurationsdatei [%s] bereits vorhanden. Bitte gebe mit [-c neue.config] eine neue Konfigurationsdatei an." % configfile)
         sys.exit(1)
     else:
         data = userinput()
