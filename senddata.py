@@ -37,12 +37,17 @@ if args.econf:
 
 
 if os.path.isfile(configfile):
-    config = configparser.ConfigParser()
+    config = configparser.ConfigParser(interpolation=None)
     config.read(configfile)
     username = config['USER']['username']
     token = config['USER']['token']
     json_file = config['DATA']['input']
     deviceId = config['DEVICE']['deviceId']
+    deviceName = config['DEVICE']['deviceName']
+    deviceType = config['DEVICE']['deviceTyp']
+    deviceGroup = config['DEVICE']['deviceGroup']
+    deviceMainGrp = config['DEVICE']['deviceMainGrp']
+    sensoranzahl = config['SENSOREN']['anzahl']
     logurl = config['DATA']['logurl']
 
     if args.logfile:
@@ -148,9 +153,25 @@ def wetterdaten():
 
 
 def regdevice():
-    print("Device registrieren")
+    # print("Device registrieren")
     # todo Code für Device Registrierung hinzufügen
 
+    items = []
+    for i in range(0, int(sensoranzahl)):
+        items.append({})
+        items[i]['type'] = config['SENSOR' + str(i+1)]['wert']
+        items[i]['description'] = config['SENSOR' + str(i+1)]['name']
+        items[i]['unit'] = str(config['SENSOR' + str(i+1)]["einheit"])
+
+    payload = {}
+    payload['deviceId'] = deviceId
+    payload['deviceName'] = deviceName
+    payload['deviceType'] = deviceType
+    payload['deviceGroup'] = deviceGroup
+    payload['deviceParentGroup'] = deviceMainGrp
+    payload['deviceDataTypes'] = items
+    test = json.dumps(payload, ensure_ascii=False)
+    print("fertig")
 
 if args.register:
     url = logurl + 'registerdevice/'

@@ -4,21 +4,30 @@ import sys
 
 
 def userinput():
-    newconf = []
-    newconf.append(input("Benutzername: "))  # 0
-    newconf.append(input("Benutzertoken: "))  # 1
-    newconf.append(input("Logfile: "))  # 2
-    newconf.append(input("Device-ID: "))  # 3
-    newconf.append(input("Device Name: "))  # 4
-    newconf.append(input("Device Typ: "))  # 5
-    newconf.append(input("Device Gruppe: "))  # 6
-    newconf.append(input("Device Hauptgruppe: "))  # 7
-    newconf.append(input("JSON Inputdatei: "))  # 8
-    newconf.append(input("Sensorlogger URL: "))  # 9
-    newconf.append(input("Temperatursensor ID: "))  # 10
-    newconf.append(input("Luftfeuchtigkeitssensor ID: "))  # 11
-    newconf.append(input("Wieviele Sensoren sind vorhanden?: "))  # 12
-    return newconf
+    conf = {}
+    conf['benutzername'] = input("Benutzername: ")
+    conf['token'] = input("Benutzertoken: ")
+    conf['logfile'] = input("Logfile: ")
+    conf['deviceId'] = input("Device-ID: ")
+    conf['deviceName'] = input("Device Name: ")
+    conf['deviceTyp'] = input("Device Typ: ")
+    conf['deviceGroup'] = input("Device Gruppe: ")
+    conf['deviceMainGrp'] = input("Device Hauptgruppe: ")
+    conf['jsonDatei'] = input("JSON Inputdatei: ")
+    conf['url'] = input("Sensorlogger URL: ")
+    # conf['tempId'] = input("Temperatursensor ID: ")
+    # conf['humidityId'] = input("Luftfeuchtigkeitssensor ID: ")
+
+    while True:
+        conf['anzahlsensoren'] = (input("Wieviele Sensoren sind vorhanden?: "))
+        try:
+            conf['anzahlsensoren'] = int(conf['anzahlsensoren'])
+        except ValueError:
+            print("Bitte eine Zahl eingeben!\n")
+        else:
+            break
+
+    return conf
 
 
 def sensordata(var):
@@ -27,9 +36,10 @@ def sensordata(var):
     for i in range(0, int(var)):
         sensor[i].append(i)
         sensor[i].append(input("Name von Sensor " + (str(int(i) + 1)) + ": "))
-        sensor[i].append(input("Messwert Sensor " + (str(int(i) + 1)) + ": "))
+        sensor[i].append(input("Typ Sensor " + (str(int(i) + 1)) + ": "))
         sensor[i].append(input("Einheit von Sensor " + (str(int(i) + 1)) + ": "))
     return sensor
+
 
 def createconf(configfile):
     if os.path.isfile(configfile):
@@ -37,40 +47,40 @@ def createconf(configfile):
         sys.exit(1)
     else:
         data = userinput()
-        sensor = sensordata(int(data[12]))
+        sensor = sensordata(int(data['anzahlsensoren']))
 
         sensorlines = []
         sensorlines.append('')
         sensorlines.append('[SENSOREN]')
-        sensorlines.append('anzahl = ' + str(data[12]))
+        sensorlines.append('anzahl = ' + str(data['anzahlsensoren']))
         sensorlines.append('')
-        for i in range(0, int(data[12])):
+        for i in range(0, int(data['anzahlsensoren'])):
             sensorlines.append('[SENSOR' + str(sensor[i][0]+1) + ']')
-            sensorlines.append('sensorname' + str(sensor[i][0]+1) + ' = ' + str(sensor[i][1]))
-            sensorlines.append('sensorwert' + str(sensor[i][0]+1) + ' = ' + str(sensor[i][2]))
-            sensorlines.append('sensoreinheit' + str(sensor[i][0]+1) + ' = ' + str(sensor[i][3]))
+            sensorlines.append("name = " + str(sensor[i][1]))
+            sensorlines.append("wert = " + str(sensor[i][2]))
+            sensorlines.append("einheit = " + str(sensor[i][3]))
             sensorlines.append('')
 
         conflines = [
             '[USER]',
-            'username = ' + str(data[0]),
-            'token = ' + str(data[1]),
+            'username = ' + str(data['benutzername']),
+            'token = ' + str(data['token']),
             '',
             '[LOG]',
-            'file = ' + str(data[2]),
+            'file = ' + str(data['logfile']),
             '',
             '[DEVICE]',
-            'deviceId = ' + str(data[3]),
-            'deviceName = ' + str(data[4]),
-            'deviceTyp = ' + str(data[5]),
-            'deviceGroup = ' + str(data[6]),
-            'deviceMainGrp = ' + str(data[7]),
-            'tempID = ' + str(data[10]),
-            'HumidityID = ' + str(data[11]),
+            'deviceId = ' + str(data['deviceId']),
+            'deviceName = ' + str(data['deviceName']),
+            'deviceTyp = ' + str(data['deviceTyp']),
+            'deviceGroup = ' + str(data['deviceGroup']),
+            'deviceMainGrp = ' + str(data['deviceMainGrp']),
+            # 'tempID = ' + str(data['tempId']),
+            # 'HumidityID = ' + str(data['humidityId']),
             '',
             '[DATA]',
-            'input = ' + str(data[8]),
-            'logurl = ' + str(data[9]),
+            'input = ' + str(data['jsonDatei']),
+            'logurl = ' + str(data['url']),
             'removejson = False',
             ''
             ]
