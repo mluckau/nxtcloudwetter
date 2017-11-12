@@ -78,7 +78,7 @@ def log(msg):
 
 
 def sendjson(payload):
-    req = urllib.request.Request(logurl)
+    req = urllib.request.Request(url)
     base64string = base64.encodebytes('%s:%s' % (username, token)).replace('\n', '')
     req.add_header("Authorization", "Basic %s" % base64string)
     req.add_header("Content-Security-Policy",
@@ -153,6 +153,7 @@ def regdevice():
 
 
 if args.register:
+    url = logurl + 'registerdevice/'
     regdevice()
 else:
     if os.path.isfile(json_file):
@@ -161,6 +162,7 @@ else:
         json_data.close()
         temp = ('%.1f' % float((data['stats']['current']['outTemp'].replace(',', '.'))))
         humidity = ('%.1f' % float((data['stats']['current']['humidity'].replace(',', '.'))))
+        url = logurl + 'createlog/'
         wetterdaten()
     else:
         log("[Fehler] %s nicht vorhanden." % json_file)
