@@ -49,6 +49,7 @@ if os.path.isfile(configfile):
     deviceMainGrp = config['DEVICE']['deviceMainGrp']
     sensoranzahl = config['SENSOREN']['anzahl']
     logurl = config['DATA']['logurl']
+    apiurl = logurl + "/apps/sensorlogger/api/v1"
 
     if args.logfile:
         logdatei = args.logfile
@@ -56,8 +57,8 @@ if os.path.isfile(configfile):
         logdatei = config['LOG']['file']
 
     rmjson = config['DATA']['removejson']
-    dataTypeIdTemp = config['DEVICE']['tempID']
-    dataTypeIdHumidity = config['DEVICE']['humidityID']
+    # dataTypeIdTemp = config['DEVICE']['tempID']
+    # dataTypeIdHumidity = config['DEVICE']['humidityID']
 else:
     print("[FEHLER] Configfile [%s] nicht vorhanden." % configfile)
     sys.exit(1)
@@ -174,7 +175,7 @@ def regdevice():
     print("fertig")
 
 if args.register:
-    url = logurl + 'registerdevice/'
+    url = apiurl + '/registerdevice/'
     regdevice()
 else:
     if os.path.isfile(json_file):
@@ -183,7 +184,7 @@ else:
         json_data.close()
         temp = ('%.1f' % float((data['stats']['current']['outTemp'].replace(',', '.'))))
         humidity = ('%.1f' % float((data['stats']['current']['humidity'].replace(',', '.'))))
-        url = logurl + 'createlog/'
+        url = apiurl + '/createlog/'
         wetterdaten()
     else:
         log("[Fehler] %s nicht vorhanden." % json_file)

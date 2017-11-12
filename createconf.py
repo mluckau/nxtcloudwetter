@@ -5,16 +5,75 @@ import sys
 
 def userinput():
     conf = {}
-    conf['benutzername'] = input("Benutzername: ")
-    conf['token'] = input("Benutzertoken: ")
-    conf['logfile'] = input("Logfile: ")
-    conf['deviceId'] = input("Device-ID: ")
-    conf['deviceName'] = input("Device Name: ")
-    conf['deviceTyp'] = input("Device Typ: ")
-    conf['deviceGroup'] = input("Device Gruppe: ")
-    conf['deviceMainGrp'] = input("Device Hauptgruppe: ")
-    conf['jsonDatei'] = input("JSON Inputdatei: ")
-    conf['url'] = input("Sensorlogger URL: ")
+    while True:
+        conf['benutzername'] = input("Benutzername: ")
+        if len(str(conf['benutzername'])) == 0:
+            print("Bitte einen Benutzernamen eingeben!")
+        else:
+            break
+
+    while True:
+        conf['token'] = input("Benutzertoken: ")
+        if len(str(conf['token'])) == 0:
+            print("Bitte den Benutzertoken für den Benutzer[" + conf['benutzername'] + "] eingeben!")
+        else:
+            break
+
+    while True:
+        conf['logfile'] = input("Logfile: ")
+        if len(str(conf['logfile'])) == 0:
+            print("Bitte den Pfad/Dateinamen für das Logfile eingeben!")
+        else:
+            break
+
+    while True:
+        conf['deviceId'] = input("Device-ID: ")
+        if len(str(conf['deviceId'])) == 0:
+            print("Bitte die Device-ID eingeben!")
+        else:
+            break
+
+    while True:
+        conf['deviceName'] = input("Device Name: ")
+        if len(str(conf['deviceName'])) == 0:
+            print("Bitte den Device Namen eingeben!")
+        else:
+            break
+
+    while True:
+        conf['deviceTyp'] = input("Device Typ: ")
+        if len(str(conf['deviceTyp'])) == 0:
+            print("Bitte den Device Typ eingeben!")
+        else:
+            break
+
+    while True:
+        conf['deviceGroup'] = input("Device Gruppe: ")
+        if len(str(conf['deviceGroup'])) == 0:
+            print("Bitte die Device Gruppe eingeben!")
+        else:
+            break
+
+    while True:
+        conf['deviceMainGrp'] = input("Device Hauptgruppe: ")
+        if len(str(conf['deviceMainGrp'])) == 0:
+            print("Bitte die Hauptgruppe des Devices eingeben!")
+        else:
+            break
+
+    while True:
+        conf['jsonDatei'] = input("JSON Inputdatei: ")
+        if len(str(conf['jsonDatei'])) == 0:
+            print("Bitte den Pfad/Dateinamen für das Input JSON-File eingeben!")
+        else:
+            break
+
+    while True:
+        conf['url'] = input("Nextcloud URL: ")
+        if len(str(conf['url'])) == 0:
+            print("Bitte die URL zu deinem Nextcloud Server eingeben!")
+        else:
+            break
     # conf['tempId'] = input("Temperatursensor ID: ")
     # conf['humidityId'] = input("Luftfeuchtigkeitssensor ID: ")
 
@@ -35,7 +94,7 @@ def sensordata(var):
     sensor.append(var)
     for i in range(0, int(var)):
         sensor[i].append(i)
-        sensor[i].append(input("Name von Sensor " + (str(int(i) + 1)) + ": "))
+        sensor[i].append(input("Name vom Sensor " + (str(int(i) + 1)) + ": "))
         sensor[i].append(input("Typ Sensor " + (str(int(i) + 1)) + ": "))
         sensor[i].append(input("Einheit von Sensor " + (str(int(i) + 1)) + ": "))
     return sensor
