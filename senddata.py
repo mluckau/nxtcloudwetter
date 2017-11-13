@@ -17,11 +17,13 @@ parser = argparse.ArgumentParser(description="Sendet Weewx-Wetterdaten an einen 
 group = parser.add_mutually_exclusive_group()
 group.add_argument("-s", "--send", help="Daten senden [default]", action="store_true")
 group.add_argument("-r", "--register", help="Device registrieren", action="store_true")
+group.add_argument("-g", "--getdata", help="Device Data Types abfragen", action="store_true")
 parser.add_argument("-d", "--debug", help="Debugmodus einschalten", action="store_true")
 parser.add_argument("-c", "--config", help="Konfigurationsdatei [default = config.file]")
 parser.add_argument("-e", "--econf", help="Konfigurationsdatei erzeugen", action="store_true")
 parser.add_argument("-t", "--trigger", help="Incrontrigger übergabe zur Benutzung in der incrontab [z.B. senddata.py -t $%%] wird in Logdatei geschrieben zum debuggen.")
 parser.add_argument("-l", "--logfile", help="Schreibt Ausgaben in [logfile], überschreibt die Angabe in der Konfigurationsdatei.")
+parser.add_argument("-i", "--deviceid", help="Device ID, überschreibt die Angabe in der Konfigurationsdatei.")
 
 args = parser.parse_args()
 
@@ -30,7 +32,6 @@ if args.config:
     configfile = args.config
 else:
     configfile = './config.file'
-
 
 if args.econf:
     createconf.createconf(configfile)
@@ -42,7 +43,12 @@ if os.path.isfile(configfile):
     username = config['USER']['username']
     token = config['USER']['token']
     json_file = config['DATA']['input']
-    deviceId = config['DEVICE']['deviceId']
+
+    if args.deviceid:
+        deviceId = args.deviceid
+    else:
+        deviceId = config['DEVICE']['deviceId']
+
     deviceName = config['DEVICE']['deviceName']
     deviceType = config['DEVICE']['deviceTyp']
     deviceGroup = config['DEVICE']['deviceGroup']
@@ -85,17 +91,23 @@ def log(msg):
 
 def sendjson(payload):
     req = urllib.request.Request(url)
-    base64string = base64.encodebytes('%s:%s' % (username, token)).replace('\n', '')
-    req.add_header("Authorization", "Basic %s" % base64string)
+    # string = bytes(('%s:%s' % (username, token)).replace('\n', ''), 'utf-8')
+    authstring = ('%s:%s' % (username, token)).replace('\n', '')
+    base64string = base64.b64encode(authstring.encode('utf-8'))
+    req.add_header("Authorization", "Basic %s" % base64string.decode("utf-8"))
     req.add_header("Content-Security-Policy",
                    "default-src 'none';script-src 'self' 'unsafe-eval';style-src 'self' 'unsafe-inline';img-src 'self' data: blob:;font-src 'self';connect-src 'self';media-src 'self'")
     req.add_header('Content-Type', 'application/json')
-    data = json.dumps(payload)
+    data = bytes(json.dumps(payload), 'utf-8')
 
     try:
         response = urllib.request.urlopen(req, data)
         result = response.getcode()
-        return result
+        if args.getdata:
+            ergebnis = response.read()
+            return ergebnis
+        else:
+            return result
 
     except urllib.error.HTTPError as e:
         log("[Fehler] Daten konnten nicht an Server gesendet werden. [Fehlercode: %s]" % e.code)
@@ -174,9 +186,27 @@ def regdevice():
     test = json.dumps(payload, ensure_ascii=False)
     print("fertig")
 
+
+def getdata():
+    print("Device Data Types holen...")
+    jsonreq = {}
+    jsonreq['deviceId'] = deviceId
+    jsonreqdata = sendjson(jsonreq)
+    jsondata = json.loads(jsonreqdata)
+    count = 0
+    for item in jsondata:
+        count += 1
+        print("ID: ", str(item['id']), "\nBeschreibung: ", str(item['description']), "\nTyp: ", str(item['type']), "\nEinheit: ", str(item['short']))
+        print("---------\n")
+    print("Anzahl Sensoren: ", str(count))
+
+
 if args.register:
     url = apiurl + '/registerdevice/'
     regdevice()
+elif args.getdata:
+    url = apiurl + '/getdevicedatatypes/'
+    getdata()
 else:
     if os.path.isfile(json_file):
         json_data = open(json_file)
